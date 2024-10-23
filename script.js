@@ -16,6 +16,10 @@ addEventListener("mousemove",(event)=>{
     mouse.x=event.x
     mouse.y=event.y
 })
+addEventListener("touchmove ",(event)=>{
+    mouse.x=event.x
+    mouse.y=event.y
+})
 
 //Player runner
 class Player{
