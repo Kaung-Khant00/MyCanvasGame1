@@ -8,8 +8,8 @@ body{
 .topscoreContainer{
     position: absolute;
     color: white;
-    font-size: 22px;
-    margin: 30px;
+    font-size: 20px;
+    margin: 5px;
 }
 .gameoverContainer{
     display: none;
