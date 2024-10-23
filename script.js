@@ -187,7 +187,12 @@ addEventListener("mousedown",()=>{
 addEventListener("mouseup",()=>{
     caller(false)
 })
-
+addEventListener("touchstart",()=>{
+    caller(true)
+})
+addEventListener("touchend",()=>{
+    caller(false)
+})
 //animation
 let keyForCancel,score=0
 function animation(){

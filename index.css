@@ -66,6 +66,7 @@ button:hover{
 .start-container{
     display: flex;
     align-items: center;
+    justify-content: center;
     width: 100dvw;
     z-index: 3;
     position: absolute;
@@ -93,4 +94,12 @@ button:hover{
     font-weight: bold;
     color: purple;
     text-shadow: 1px 1px 1px white;
+}
+.sub-container{
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
 }
