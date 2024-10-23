@@ -1,6 +1,7 @@
 const canvas = document.querySelector("canvas")
 const c = canvas.getContext("2d")
 const scoreTag=document.querySelector(".topscore")
+const bestScoreTag=document.querySelector(".topbestscore")
 const popupScore=document.querySelector(".gameover")
 const restartButton=document.querySelector(".Restart")
 const gameoverContainer=document.querySelector(".gameoverContainer")
@@ -113,7 +114,10 @@ player.draw()
 
 //restart the game
 restartButton.addEventListener("click",()=>{
-    setTimeout(()=>{gameoverFunction()},100)
+    setTimeout(()=>{
+        gameoverFunction()
+        animation()
+    },100)
 })
 const barrier=document.querySelector(".barrier")
 const gameoverFunction=()=>{
@@ -126,16 +130,13 @@ const gameoverFunction=()=>{
         gameoverContainer.style.display="none"
         gameoverContainer.classList.remove("gameOverAnimation")
     },500)
-    spawnEnemy()
-    animation()
     score=0
     barrier.classList.add("prevent")
 }
 //calling enemy , making enemy
-function spawnEnemy(){
-    setInterval(()=>{
+function spawnFun(){
         let x,y
-        if(Math.random()-0.5<0){
+        if(Math.random()-.5<0){
             x=Math.random()*innerWidth
             Math.random()-.5<0 ? y=0 : y=innerHeight
         }else{
@@ -144,32 +145,48 @@ function spawnEnemy(){
         }
         const radian = Math.atan2(innerHeight/2-y,innerWidth/2-x)
         enemy.push(new Enemy(x,y,Math.random()*14+8,`hsl(${Math.random()*360},50%,50%)`,{
-            x:Math.cos(radian)*1.1,y:Math.sin(radian)*1.1
+            x:Math.cos(radian)*.95,y:Math.sin(radian)*.95
         }))
-    },1500)
-    setInterval(()=>{
-        let x,y
-        if(Math.random()-0.5<0){
-            x=Math.random()*innerWidth
-            Math.random()-.5<0 ? y=0 : y=innerHeight
-        }else{
-            y=Math.random()*innerHeight
-            Math.random()-.5<0 ? x=0 : x=innerWidth
-        }
-        const radian = Math.atan2(innerHeight/2-y,innerWidth/2-x)
-        enemy.push(new Enemy(x,y,Math.random()*40+8,"gold",{
-            x:Math.cos(radian)*0.8,y:Math.sin(radian)*0.8
-        }))
-    },25000)
 }
-addEventListener("click",()=>{
+const spawnGoldenFun=()=>{
+    let x,y
+    if(Math.random()-0.5<0){
+        x=Math.random()*innerWidth
+        Math.random()-.5<0 ? y=0 : y=innerHeight
+    }else{
+        y=Math.random()*innerHeight
+        Math.random()-.5<0 ? x=0 : x=innerWidth
+    }
+    const radian = Math.atan2(innerHeight/2-y,innerWidth/2-x)
+    enemy.push(new Enemy(x,y,Math.random()*40+8,"gold",{
+        x:Math.cos(radian)*0.8,y:Math.sin(radian)*0.8
+    }))
+}
+function spawnEnemy(){
+    setInterval(spawnFun,900)
+    setInterval(spawnGoldenFun,25000)
+}
+function shooting(){
     score-=1
     let radian=Math.atan2(mouse.x-innerWidth/2,mouse.y-innerHeight/2)-Math.PI/2
     projectiles.push(new Projectile(innerWidth/2,innerHeight/2,5,"white",{
         x:Math.cos(radian)*5,y:Math.sin(-radian)*5
     }))
+}
+let start
+function caller(check){
+    if(check){
+        start=setInterval(shooting,100)
+    }else{
+        clearInterval(start)
+    }
+}
+addEventListener("mousedown",()=>{
+    caller(true)
 })
-
+addEventListener("mouseup",()=>{
+    caller(false)
+})
 
 //animation
 let keyForCancel,score=0
@@ -200,8 +217,16 @@ function animation(){
     enemy.forEach((enemys,enemyindex)=>{
         const enemyDistance = Math.hypot(enemys.x-innerWidth/2,enemys.y-innerHeight/2)
         if(enemyDistance-enemys.radius-player.radius<=0){
+            const currentBest = parseInt(localStorage.getItem("key"))
+            const gameEndScore = parseInt(scoreTag.innerHTML)
+            clearInterval(spawnFun,900)
+            clearInterval(spawnGoldenFun,25000)
             cancelAnimationFrame(keyForCancel)
             gameoverContainer.style.display="flex"
+            if(gameEndScore>currentBest){
+                bestScoreTag.innerHTML=gameEndScore
+                localStorage.setItem("key",gameEndScore)
+            }
         }
         projectiles.forEach((projectile,projectileIndex)=>{
             const distance = Math.hypot(enemys.x-projectile.x,enemys.y-projectile.y)
@@ -238,7 +263,26 @@ function animation(){
     popupScore.innerHTML=score
 }
 //function calling place
-setTimeout(()=>{
-    spawnEnemy()
-    animation()
-},50)
+const startContainer=document.querySelector(".start-container")
+let startGame=false
+function gameStart(){
+    if(startGame) return 
+    startContainer.style.transform = "scale(0.01)"
+    startContainer.style.opacity = "0"
+    setTimeout(()=>{
+    startContainer.style.display = "none"
+    startContainer.style.zIndex = "-1"
+    },900)
+    startGame=true
+    canvas.style.display="inherit"
+    setTimeout(()=>{
+        spawnEnemy()
+        animation()
+    },50)
+}
+/*  loacal Storage  */
+if(localStorage.getItem("key")==null) {
+    localStorage.setItem("key",0)
+}else{
+    bestScoreTag.innerHTML= parseInt(localStorage.getItem("key"))
+}
