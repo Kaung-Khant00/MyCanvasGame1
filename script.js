@@ -16,11 +16,6 @@ addEventListener("mousemove",(event)=>{
     mouse.x=event.x
     mouse.y=event.y
 })
-addEventListener("touchmove ",(event)=>{
-    mouse.x=event.x
-    mouse.y=event.y
-})
-
 //Player runner
 class Player{
     constructor(x,y,radius,color){
@@ -179,11 +174,19 @@ function shooting(){
 }
 let start
 function caller(check){
+    console.log("hello")
     if(check){
         start=setInterval(shooting,100)
     }else{
         clearInterval(start)
     }
+}
+addEventListener("touchstart",(event)=>{
+    mouse.x=event.x
+    mouse.y=event.y
+})
+function caller2(){
+    setTimeout(()=>{shooting()},5)
 }
 addEventListener("mousedown",()=>{
     caller(true)
@@ -191,11 +194,8 @@ addEventListener("mousedown",()=>{
 addEventListener("mouseup",()=>{
     caller(false)
 })
-addEventListener("touchstart",()=>{
-    caller(true)
-})
 addEventListener("touchend",()=>{
-    caller(false)
+    caller2()
 })
 //animation
 let keyForCancel,score=0
