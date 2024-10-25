@@ -231,10 +231,14 @@ function projectileMan(check){
         clearInterval(shoot)
     }
 }
-const touchmoving = (event) => {
+
+if(localStorage.getItem("key")==null){
+    localStorage.setItem("key",0)
+}
+const projectileMantouch = (event) =>{
     mouse.x=event.changedTouches[0].screenX
-    mouse.y=event.changedTouches[0].screenY
-    console.log(mouse)
+    mouse.y=event.changedTouches[0].screeny
+    projectileMaker()
 }
 function gameStart(){
     bestScore.innerHTML=localStorage.getItem("key")
@@ -248,12 +252,8 @@ function gameStart(){
         startContainer.display="none"
         addEventListener("mousedown",()=>{projectileMan(true)})
         addEventListener("mouseup",()=>{projectileMan(false)})
-        addEventListener("touchstart",()=>{projectileMan(true)})
-        addEventListener("touchend",()=>{projectileMan(false)})
-        addEventListener("touchmove",touchmoving)
+        addEventListener("touchstart",projectileMantouch)
+        addEventListener("touchend",projectileMantouch)
         addEventListener("click",projectileMaker)
     },1001)
-}
-if(localStorage.getItem("key")==null){
-    localStorage.setItem("key",0)
 }
