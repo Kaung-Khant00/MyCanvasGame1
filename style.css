@@ -4,6 +4,7 @@
 }
 body{
     background-color: black;
+    user-select: none;
 }
 .score_container{
     position: absolute;
