@@ -215,7 +215,6 @@ let noramlEnemy,goldEnemy
 
 /* event related Functions  */
 function projectileMaker(){
-    score-=2
     const radian = Math.atan2( mouse.y - innerHeight/2 , mouse.x - innerWidth/2)
     projectiles.push(
         new Projectile (innerWidth/2,innerHeight/2,5,"white",{
@@ -223,6 +222,7 @@ function projectileMaker(){
             y : Math.sin(radian) *4
         })
     )
+    score-=1
 }
 function projectileMan(check){ 
     if(check){
@@ -236,8 +236,9 @@ if(localStorage.getItem("key")==null){
     localStorage.setItem("key",0)
 }
 const projectileMantouch = (event) =>{
-    mouse.x=event.changedTouches[0].screenX
-    mouse.y=event.changedTouches[0].screeny
+    mouse.x=event.touches[0].clientX
+    mouse.y=event.touches[0].clientY
+    console.log(event)
     projectileMaker()
 }
 function gameStart(){
@@ -253,7 +254,9 @@ function gameStart(){
         addEventListener("mousedown",()=>{projectileMan(true)})
         addEventListener("mouseup",()=>{projectileMan(false)})
         addEventListener("touchstart",projectileMantouch)
-        addEventListener("touchend",projectileMantouch)
-        addEventListener("click",projectileMaker)
+        addEventListener("touchstart",()=>{
+            console.log("touched")
+        })
+
     },1001)
 }
