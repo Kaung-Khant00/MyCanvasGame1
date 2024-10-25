@@ -4,24 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game</title>
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="topscoreContainer"><span>Scores:  </span><span class="topscore">0</span></div>
-    <div class="topscoreContainer" style="right: 0;"><span>Best Scores:  </span><span class="topbestscore">0</span></div>
-    <div class="gameoverContainer">
-        <div class="gameover">0</div>
-        <div class="scores">Score</div>
-        <button class="Restart">Restart</button>
+    <div class="score_container"><span>Score : </span><span class="score">0</span></div>
+    <div class="best_score_container"><span>Best Score : </span><span class="best_score">0</span></div>
+    <div class="lose_container" style="display: none;">
+        <div class="sub_container_lose">
+            <div class="score_con">
+                <div style="opacity: .7;">Score</div>
+                <div class="endScore">0</div>
+            </div>
+            <button class="restart_button" onclick="restartGame()">Restart</button>
+        </div>
     </div>
     <div class="start-container" style="height: 100dvh;">
         <div class="sub-container">
-            <div class="theTitleName">Shooter Game<span class="version">v.2.0</span></div>
+            <div class="theTitleName">Shooter Game<span class="version">v.2.1</span></div>
             <div class="startButton" onclick="gameStart()">Start</div>
         </div>
     </div>
-    <div class="barrier"></div>
-    <canvas style="display: none;"></canvas>
+        <canvas></canvas>
 </body>
 <script src="script.js"></script>
 </html>

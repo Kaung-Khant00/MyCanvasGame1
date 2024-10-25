@@ -1,67 +1,40 @@
 const canvas = document.querySelector("canvas")
 const c = canvas.getContext("2d")
-const scoreTag=document.querySelector(".topscore")
-const bestScoreTag=document.querySelector(".topbestscore")
-const popupScore=document.querySelector(".gameover")
-const restartButton=document.querySelector(".Restart")
-const gameoverContainer=document.querySelector(".gameoverContainer")
-canvas.width=innerWidth
-canvas.height=innerHeight
-//mouse event
-let mouse={
-    x:innerWidth/2,
-    y:innerHeight/2
-}
-addEventListener("mousemove",(event)=>{
-    mouse.x=event.x
-    mouse.y=event.y
-})
-//Player runner
-class Player{
-    constructor(x,y,radius,color){
-        this.x=x
-        this.y=y
-        this.radius=radius
-        this.color=color
-    }
-    draw(){
-        c.beginPath()
-        c.arc(this.x,this.y,this.radius,0,Math.PI*2,false)
-        c.fillStyle=this.color
-        c.fill()
-    }
-}
-class Projectile{
-    constructor(x,y,radius,color,velocity){
-        this.x=x
-        this.y=y
-        this.radius=radius
-        this.color=color
-        this.velocity=velocity
-        this.check=0
-    }
-    draw(){
-        c.beginPath()
-        c.arc(this.x,this.y,this.radius,0,Math.PI*2,false)
-        c.fillStyle=this.color
-        c.fill()
-    }
-    update(){
-        this.x+=this.velocity.x
-        this.y+=this.velocity.y
-        this.draw()
-    }
-}
+canvas.width = innerWidth
+canvas.height = innerHeight
+const scoreTag = document.querySelector(".score")
+const loseContainer = document.querySelector(".lose_container")
+const restartButton = document.querySelector(".restart_button")
+const endScoreTag = document.querySelector(".endScore")
+const startContainer = document.querySelector(".start-container")
+const canvasContainer = document.querySelector(".canvas_container")
+const bestScore = document.querySelector(".best_score")
 
-//enemy array runner
-class Enemy{
-    constructor(x,y,radius,color,velocity){
+/*  mouse move event and cursor location  */
+let mouse = { x : null ,  y  : null }
+addEventListener("mousemove",(event) => {
+    mouse.x = event.clientX
+    mouse.y = event.clientY
+})
+/*  restarting the game function */
+function restartGame(){
+    setTimeout(()=>{addEventListener("click",projectileMaker)},10)
+    projectiles=[]
+    enemys=[]
+    particles=[]
+    score=0
+    loseContainer.style.display="none"
+    animation()
+    noramlEnemy = setInterval(()=>{enemyMaker("normal")},3000)
+    goldEnemy = setInterval(()=>{enemyMaker("gold")},10000)
+}
+/*  classes  */
+class Player {
+    constructor(x,y,radius,color) {
         this.x=x
         this.y=y
         this.radius=radius
         this.color=color
-        this.velocity=velocity
-        this.check=0
     }
     draw(){
         c.beginPath()
@@ -69,20 +42,39 @@ class Enemy{
         c.fillStyle=this.color
         c.fill()
     }
+}
+class Projectile extends Player{
+    constructor(x,y,radius,color,velocity) {
+        super(x,y,radius,color)
+        this.velocity = velocity
+    }
     update(){
-        this.x+=this.velocity.x
-        this.y+=this.velocity.y
+        this.x += this.velocity.x
+        this.y += this.velocity.y
         this.draw()
     }
 }
-const fraction=0.99
-class Particles{
-    constructor(x,y,radius,color,velocity){
+class Enemy extends Projectile{
+    draw(){
+        c.beginPath()
+        c.arc(this.x,this.y,this.radius,0,Math.PI*2,false)
+        c.fillStyle=this.color
+        c.fill()
+        if(this.color=="gold"){
+        c.lineWidth=5
+        c.strokeStyle="white"
+        c.stroke()
+        }
+    }
+}
+const friction = 0.99
+class Particle{
+    constructor(x,y,radius,color,velocity) {
         this.x=x
         this.y=y
         this.radius=radius
         this.color=color
-        this.velocity=velocity
+        this.velocity = velocity
         this.alpha=1
     }
     draw(){
@@ -95,203 +87,173 @@ class Particles{
         c.restore()
     }
     update(){
-        this.velocity.x*=fraction
-        this.velocity.y*=fraction
-        this.x+=this.velocity.x
-        this.y+=this.velocity.y
-        this.alpha-=0.01
+        this.alpha -= 0.025
+        this.x += this.velocity.x 
+        this.y += this.velocity.y 
+        this.velocity.x *= friction
+        this.velocity.y *= friction
         this.draw()
     }
 }
 
-//arrays
-let player=new Player(innerWidth/2,innerHeight/2,20,"white")
-let projectiles=[]
-let enemy=[]
-let particles=[]
-player.draw()
-
-//restart the game
-restartButton.addEventListener("click",()=>{
-    setTimeout(()=>{
-        gameoverFunction()
-        animation()
-    },100)
-})
-const barrier=document.querySelector(".barrier")
-const gameoverFunction=()=>{
-    player=new Player(innerWidth/2,innerHeight/2,20,"white")
-    projectiles=[]
-    enemy=[]
-    particles=[]
-    gameoverContainer.classList.add("gameOverAnimation")
-    setTimeout(()=>{
-        gameoverContainer.style.display="none"
-        gameoverContainer.classList.remove("gameOverAnimation")
-    },500)
-    score=0
-    barrier.classList.add("prevent")
-}
-//calling enemy , making enemy
-function spawnFun(){
-        let x,y
-        if(Math.random()-.5<0){
-            x=Math.random()*innerWidth
-            Math.random()-.5<0 ? y=0 : y=innerHeight
-        }else{
-            y=Math.random()*innerHeight
-            Math.random()-.5<0 ? x=0 : x=innerWidth
-        }
-        const radian = Math.atan2(innerHeight/2-y,innerWidth/2-x)
-        enemy.push(new Enemy(x,y,Math.random()*14+8,`hsl(${Math.random()*360},50%,50%)`,{
-            x:Math.cos(radian)*.95,y:Math.sin(radian)*.95
-        }))
-}
-const spawnGoldenFun=()=>{
-    let x,y
-    if(Math.random()-0.5<0){
-        x=Math.random()*innerWidth
-        Math.random()-.5<0 ? y=0 : y=innerHeight
-    }else{
-        y=Math.random()*innerHeight
-        Math.random()-.5<0 ? x=0 : x=innerWidth
+    /*  gameover animation */
+    let animatekey
+    const animateParticle = () => {
+        console.log("hello")
+        animatekey = requestAnimationFrame(animateParticle)
+        c.fillStyle="rgb(0,0,0,0.05)"
+        c.fillRect(0,0,innerWidth,innerHeight)
+        particles.forEach((item,index)=>{
+            item.alpha<=.025 ? particles.splice(index,1) : item.update()
+        })
     }
-    const radian = Math.atan2(innerHeight/2-y,innerWidth/2-x)
-    enemy.push(new Enemy(x,y,Math.random()*40+8,"gold",{
-        x:Math.cos(radian)*0.8,y:Math.sin(radian)*0.8
-    }))
-}
-function spawnEnemy(){
-    setInterval(spawnFun,900)
-    setInterval(spawnGoldenFun,25000)
-}
-function shooting(){
-    score-=1
-    let radian=Math.atan2(mouse.x-innerWidth/2,mouse.y-innerHeight/2)-Math.PI/2
-    projectiles.push(new Projectile(innerWidth/2,innerHeight/2,5,"white",{
-        x:Math.cos(radian)*5,y:Math.sin(-radian)*5
-    }))
-}
-let start
-function caller(check){
-    console.log("hello")
-    if(check){
-        start=setInterval(shooting,100)
-    }else{
-        clearInterval(start)
-    }
-}
-addEventListener("touchstart",(event)=>{
-    mouse.x=event.x
-    mouse.y=event.y
-})
-function caller2(){
-    setTimeout(()=>{shooting()},5)
-}
-addEventListener("mousedown",()=>{
-    caller(true)
-})
-addEventListener("mouseup",()=>{
-    caller(false)
-})
-addEventListener("touchend",()=>{
-    caller2()
-})
-//animation
-let keyForCancel,score=0
+/*  classes value making and storing the moving object data */
+let player = new Player(innerWidth/2,innerHeight/2,20,"white")
+let [projectiles,enemys,particles]=[[],[],[]]
+let score=0
+/*  animation function  */
 function animation(){
-    keyForCancel=requestAnimationFrame(animation)
-    c.fillStyle="rgba(0,0,0,0.1)"
+    const animatedKey = requestAnimationFrame(animation)
+    c.fillStyle="rgb(0,0,0,0.1)"
     c.fillRect(0,0,innerWidth,innerHeight)
-    projectiles.forEach((element,i)=>{
-        if(element.x-element.radius<0
-            ||element.x-element.radius>innerWidth
-            ||element.y-element.radius<0
-            ||element.y-element.radius>innerHeight){
-            return projectiles.splice(i,1)
-        }
-            element.update()
-    })
-    enemy.forEach(element => {
-        element.update()
-    });
     player.draw()
-    particles.forEach((element,particleindex)=>{
-        if(element.alpha<=0.02){
-            particles.splice(particleindex,1)
-        }else{
-            element.update()
+    projectiles.forEach((pItem,pIndex)=>{
+        pItem.update()
+        /*  removeing the projectile that beyond the screen */
+        if(pItem.x-pItem.radius<0||
+            pItem.x+pItem.radius>innerWidth||
+            pItem.y-pItem.radius<0||
+            pItem.y+pItem.radius>innerHeight
+        ){
+            projectiles.splice(pIndex,1)
         }
-    })
-    enemy.forEach((enemys,enemyindex)=>{
-        const enemyDistance = Math.hypot(enemys.x-innerWidth/2,enemys.y-innerHeight/2)
-        if(enemyDistance-enemys.radius-player.radius<=0){
-            const currentBest = parseInt(localStorage.getItem("key"))
-            const gameEndScore = parseInt(scoreTag.innerHTML)
-            clearInterval(spawnFun,900)
-            clearInterval(spawnGoldenFun,25000)
-            cancelAnimationFrame(keyForCancel)
-            gameoverContainer.style.display="flex"
-            if(gameEndScore>currentBest){
-                bestScoreTag.innerHTML=gameEndScore
-                localStorage.setItem("key",gameEndScore)
-            }
-        }
-        projectiles.forEach((projectile,projectileIndex)=>{
-            const distance = Math.hypot(enemys.x-projectile.x,enemys.y-projectile.y)
-            if(distance-enemys.radius-projectile.radius<1){
-                let radius=enemys.radius
-                if(enemys.color==="gold"){
-                    radius=enemys.radius*2
+        enemys.forEach((eItem,eIndex) => {
+            /*  hit the enemy with projectile and remove it */
+            const dis = Math.hypot(eItem.y-pItem.y , eItem.x-pItem.x)
+            if(dis-eItem.radius-pItem.radius < .1){
+                for (let i = 0; i < eItem.radius*2; i++) {
+                    let radius = Math.random()*2+1
+                    const radian = Math.random()*Math.PI*2
+                    particles.push(new Particle(
+                        eItem.x,eItem.y,radius,eItem.color,{
+                            x : Math.cos(radian)*Math.random()*5,
+                            y : Math.sin(radian)*Math.random()*5
+                        }
+                    ))
                 }
-                for (let i = 0; i < radius; i++) {
-                    particles.push(new Particles(enemys.x,enemys.y,Math.random()*2+0.5,enemys.color,{
-                        x:Math.cos(Math.random()*Math.PI*2),
-                        y:Math.sin(Math.random()*Math.PI*2)
-                    }))
-                }
-                projectiles.splice(projectileIndex,1)
-                if(enemys.radius<12){
-                    enemy.splice(enemyindex,1)
-                    if(enemys.color==="gold"){
-                        score+=5
-                    }
-                    score+=3
+                if(eItem.radius>15){
+                    score+=5
+                    eItem.color=="gold"? eItem.radius-=3 : eItem.radius-=4
+                    projectiles.splice(pIndex,1)
                 }else{
-                    enemys.radius-=3
-                    if(enemys.color==="gold"){
-                        enemys.radius+=1
-                        score+=5
-                    }
-                    score+=4
+                    score+=10
+                    enemys.splice(eIndex,1)
+                    projectiles.splice(pIndex,1)
                 }
             }
         })
     })
-    scoreTag.innerHTML=score
-    popupScore.innerHTML=score
+    enemys.forEach((enemyItem)=>{
+        enemyItem.update()
+        /*  stoping the game when lose  */
+        const dis = Math.hypot(enemyItem.y-player.y , enemyItem.x-player.x)
+        if(dis-player.radius-enemyItem.radius<-1){
+            removeEventListener("mousedown",()=>{projectileMan(true)})
+            removeEventListener("mouseup",()=>{projectileMan(false)})
+            removeEventListener("click",projectileMaker)
+            const best = parseInt(localStorage.getItem("key"))
+            if(best<=score) localStorage.setItem("key",score)
+            bestScore.innerHTML=localStorage.getItem("key")
+            cancelAnimationFrame(animatedKey)
+            endScoreTag.innerHTML=score
+            setTimeout(()=>{loseContainer.style.display="flex"},1000)
+            for (let i = 0; i < 50; i++) {
+                let radius = Math.random()*2+1.5
+                const radian = Math.random()*Math.PI*2
+                particles.push(new Particle(
+                    player.x,player.y,radius,player.color,{
+                        x : Math.cos(radian)*Math.random()*9,
+                        y : Math.sin(radian)*Math.random()*9
+                    }
+                ))
+            }    
+            clearInterval(noramlEnemy)
+            clearInterval(goldEnemy)
+            setTimeout(animateParticle,500)
+            setTimeout(()=>{cancelAnimationFrame(animatekey)},1500)
+    }})
+    particles.forEach((item,index)=>{
+        item.alpha<=.025 ? particles.splice(index,1) : item.update()
+    })
+/*  update the score to the UI */
+scoreTag.innerHTML=score
 }
-//function calling place
-const startContainer=document.querySelector(".start-container")
-let startGame=false
+
+/*  cresting the enemy  */
+function enemyMaker(type){
+    let x , y 
+    if(Math.random() < .5){
+        x = Math.random() < .5 ? 0 : innerWidth
+        y = Math.random() * innerHeight
+    }else{
+        x = Math.random() * innerWidth
+        y = Math.random() < .5 ? 0 : innerHeight
+    }
+    let radius = Math.random()*25+11
+    if (type=="gold") radius+=10
+    const color = type=="normal" ? `hsl(${Math.random()*360}deg,50%,50%)` : "gold"
+    const radian = Math.atan2( innerHeight/2 - y , innerWidth/2 - x )
+    enemys.push(
+        new Enemy ( x , y , radius , color , {
+            x : Math.cos(radian) ,
+            y : Math.sin(radian)
+        })
+    )
+}
+/*  spawning the enemy here  */
+let noramlEnemy,goldEnemy 
+
+/* event related Functions  */
+function projectileMaker(){
+    score-=2
+    const radian = Math.atan2( mouse.y - innerHeight/2 , mouse.x - innerWidth/2)
+    projectiles.push(
+        new Projectile (innerWidth/2,innerHeight/2,5,"white",{
+            x : Math.cos(radian) *4,
+            y : Math.sin(radian) *4
+        })
+    )
+}
+function projectileMan(check){ 
+    if(check){
+        shoot = setInterval(projectileMaker,100)
+    }else{
+        clearInterval(shoot)
+    }
+}
+const touchmoving = (event) => {
+    mouse.x=event.changedTouches[0].screenX
+    mouse.y=event.changedTouches[0].screenY
+    console.log(mouse)
+}
 function gameStart(){
-    if(startGame) return 
-    startContainer.style.transform = "scale(0.01)"
-    startContainer.style.opacity = "0"
+    bestScore.innerHTML=localStorage.getItem("key")
     setTimeout(()=>{
-    startContainer.style.display = "none"
-    startContainer.style.zIndex = "-1"
-    },900)
-    startGame=true
-    canvas.style.display="inherit"
-    setTimeout(()=>{
-        spawnEnemy()
         animation()
-    },50)
+        noramlEnemy = setInterval(()=>{enemyMaker("normal")},3000)
+        goldEnemy = setInterval(()=>{enemyMaker("gold")},10000)
+    },700)
+    startContainer.style.transform="scale(0.001)"
+    setTimeout(()=>{
+        startContainer.display="none"
+        addEventListener("mousedown",()=>{projectileMan(true)})
+        addEventListener("mouseup",()=>{projectileMan(false)})
+        addEventListener("touchstart",()=>{projectileMan(true)})
+        addEventListener("touchend",()=>{projectileMan(false)})
+        addEventListener("touchmove",touchmoving)
+        addEventListener("click",projectileMaker)
+    },1001)
 }
-/*  loacal Storage  */
-if(localStorage.getItem("key")==null) {
+if(localStorage.getItem("key")==null){
     localStorage.setItem("key",0)
-}else{
-    bestScoreTag.innerHTML= parseInt(localStorage.getItem("key"))
 }
