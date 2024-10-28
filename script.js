@@ -131,6 +131,7 @@ function animation(){
             /*  hit the enemy with projectile and remove it */
             const dis = Math.hypot(eItem.y-pItem.y , eItem.x-pItem.x)
             if(dis-eItem.radius-pItem.radius < .1){
+                new Audio("./Audios/explode.wav").play()
                 for (let i = 0; i < eItem.radius*2; i++) {
                     let radius = Math.random()*2+1
                     const radian = Math.random()*Math.PI*2
@@ -158,6 +159,9 @@ function animation(){
         /*  stoping the game when lose  */
         const dis = Math.hypot(enemyItem.y-player.y , enemyItem.x-player.x)
         if(dis-player.radius-enemyItem.radius<-1){
+            const GameoverAudio=new Audio()
+            GameoverAudio.src="./Audios/preview.mp3"
+            GameoverAudio.play()            
             removeEventListener("mousedown",()=>{projectileMan(true)})
             removeEventListener("mouseup",()=>{projectileMan(false)})
             removeEventListener("click",projectileMaker)
@@ -212,9 +216,10 @@ function enemyMaker(type){
 }
 /*  spawning the enemy here  */
 let noramlEnemy,goldEnemy 
-
 /* event related Functions  */
 function projectileMaker(){
+    const ShootAudio=new Audio("./Audios/shoot.wav")
+    ShootAudio.play()
     const radian = Math.atan2( mouse.y - innerHeight/2 , mouse.x - innerWidth/2)
     projectiles.push(
         new Projectile (innerWidth/2,innerHeight/2,5,"white",{
@@ -241,7 +246,11 @@ const projectileMantouch = (event) =>{
     console.log(event)
     projectileMaker()
 }
+const battleAudio=new Audio("./Audios/backgroundMusic.wav")
 function gameStart(){
+    GameStartAudio.pause()
+    battleAudio.play()
+    new Audio("./Audios/start.mp3").play()
     bestScore.innerHTML=localStorage.getItem("key")
     setTimeout(()=>{
         animation()
@@ -253,6 +262,7 @@ function gameStart(){
         startContainer.display="none"
         addEventListener("mousedown",()=>{projectileMan(true)})
         addEventListener("mouseup",()=>{projectileMan(false)})
+        addEventListener("click",projectileMaker)
         addEventListener("touchstart",projectileMantouch)
         addEventListener("touchstart",()=>{
             console.log("touched")
@@ -260,3 +270,19 @@ function gameStart(){
 
     },1001)
 }
+function quitGame(){
+    startContainer.style.transform="scale(1)"
+    battleAudio.pause()
+    GameStartAudio.play()
+    projectiles=[]
+    enemys=[]
+    particles=[]
+    score=0
+    loseContainer.style.display="none"
+}
+/*  login intro game theme */
+const GameStartAudio=new Audio()
+GameStartAudio.src="./Audios/alexander-nakarada-superepic(chosic.com).mp3"
+addEventListener("load",()=>{
+    GameStartAudio.play()
+})
